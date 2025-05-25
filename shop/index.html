@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lavora Shop</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8fafc;
+    }
+    
+    .marquee-text {
+      font-size: 1rem;
+      padding: 0.5rem 0;
+      background: linear-gradient(90deg, #f0fdf4, #ecfdf5, #f0fdf4);
+      border-radius: 0.5rem;
+    }
+    
+    .product-card {
+      transition: all 0.3s ease;
+      border-radius: 0.75rem;
+      overflow: hidden;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    
+    .product-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+    
+    .cart-counter {
+      position: absolute;
+      top: -5px;
+      right: -5px;
+      font-size: 0.7rem;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+    }
+    
+    .cart-btn {
+      position: relative;
+    }
+    
+    @media (max-width: 768px) {
+      .marquee-text {
+        font-size: 0.8rem;
+      }
+      
+      .product-card {
+        width: 100% !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <div class="container py-3">
+    <div class="d-flex justify-content-between align-items-center">
+      <a href="https://www.lavoya.shop">
+        <img src="../images/lavora-tab.png" width="50" height="50" alt="Lavora Logo">
+      </a>
+      <button class="btn btn-primary cart-btn position-relative" onclick="openCartModal()">
+        <i class="fas fa-shopping-cart"></i>
+        <span id="cartCounter" class="cart-counter badge bg-danger" style="display: none;"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Announcement Marquee -->
+  <div class="bg-emerald-50 py-2">
+    <div class="container">
+      <marquee class="marquee-text">
+        <span class="text-emerald-600 fw-bold">LAVORA</span> သည် <span class="text-emerald-600 fw-bold">Lavoya Myanmar</span> ၏ Brand Name ဖြစ်သည်။ 
+      </marquee>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="container py-5">
+    <div id="productContainer" class="row g-4"></div>
+  </main>
+
+  <!-- Image Modal -->
+  <div class="modal fade" id="imageModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-body text-center p-0">
+          <img id="fullImage" src="" class="img-fluid rounded" alt="">
+        </div>
+        <div class="modal-footer justify-content-center">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i> Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cart Modal -->
+  <div class="modal fade" id="cartModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Your Shopping Cart</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body" id="cartItems"></div>
+        <div class="modal-footer d-flex justify-content-between align-items-center">
+          <div>
+            <h5 class="mb-0">Total: <span id="cartTotal" class="fw-bold">0</span> MMK</h5>
+          </div>
+          <div>
+            <button class="btn btn-outline-danger me-2" onclick="clearCart()">
+              <i class="fas fa-trash me-1"></i> Clear
+            </button>
+            <button class="btn btn-success" onclick="checkout()">
+              <i class="fas fa-credit-card me-1"></i> Checkout
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Checkout Modal -->
+  <div class="modal fade" id="checkoutModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header bg-primary text-white">
+          <h5 class="modal-title">Complete Your Order</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body">
+          <form id="checkoutForm">
+            <div class="mb-3">
+              <label for="custName" class="form-label">Full Name</label>
+              <input id="custName" type="text" class="form-control" placeholder="Enter your name" required>
+            </div>
+            <div class="mb-3">
+              <label for="custPhone" class="form-label">Phone Number</label>
+              <input id="custPhone" type="tel" class="form-control" placeholder="09XXXXXXXXX" required>
+            </div>
+            <div class="mb-3">
+              <label for="custEmail" class="form-label">Email Address</label>
+              <input id="custEmail" type="email" class="form-control" placeholder="your@email.com">
+            </div>
+            <div class="mb-3">
+              <label for="custAddress" class="form-label">Delivery Address</label>
+              <textarea id="custAddress" class="form-control" rows="3" placeholder="Your complete address" required></textarea>
+            </div>
+            
+            <div class="card border-0 bg-light mt-4">
+              <div class="card-body">
+                <h6 class="card-title">Order Summary</h6>
+                <div class="d-flex justify-content-between">
+                  <span>Subtotal:</span>
+                  <span id="checkoutTotalAmount">0</span> MMK
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span>Discount:</span>
+                  <span id="checkoutDiscount">0</span> MMK
+                </div>
+                <hr>
+                <div class="d-flex justify-content-between fw-bold">
+                  <span>Total:</span>
+                  <span id="checkoutNet">0</span> MMK
+                </div>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button class="btn btn-outline-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-times me-1"></i> Cancel
+          </button>
+          <button class="btn btn-success" onclick="placeOrder()">
+            <i class="fas fa-paper-plane me-1"></i> Place Order
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-4 mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-6">
+          <!-- <h5>Lavora</h5> -->
+          <a href="https://www.lavoya.shop"><img src="../images/lavora-header.png" width="50px" height="50px"></a>
+          <p>LAVORA</span> သည် <span class="text-emerald-600 fw-bold">Lavoya Myanmar</span> ၏ Brand Name ဖြစ်သည်။</p>
+        </div>
+        <div class="col-md-3">
+          <h5>Quick Links</h5>
+          <ul class="list-unstyled">
+            <li><a href="https://www.lavoya.shop" class="text-white-50">Home</a></li>
+            <li><a href="#productContainer" class="text-white-50">Products</a></li>
+          </ul>
+        </div>
+        <div class="col-md-3">
+          <h5>Contact</h5>
+          <ul class="list-unstyled">
+            <li><i class="fas fa-phone me-2"></i> 09-123456789</li>
+            <li><i class="fas fa-envelope me-2"></i>noreply.lavoramyanmar@gmail.com</li>
+          </ul>
+        </div>
+      </div>
+      <hr>
+      <div class="text-center">
+        <p class="mb-0">&copy; 2025 Lavora. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="shop.js"></script>
+</body>
+</html>
